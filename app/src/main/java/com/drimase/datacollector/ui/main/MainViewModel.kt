@@ -1,24 +1,16 @@
-package com.drimase.datacollector.main
+package com.drimase.datacollector.ui.main
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.Context
-import android.location.Location
-import android.media.MediaRecorder
 import android.util.Log
-import android.view.TextureView
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
 import androidx.camera.core.*
 import androidx.lifecycle.*
-import com.drimase.datacollector.BaseApplication
 import com.drimase.datacollector.GpsService
-import com.drimase.datacollector.MainActivity
+import com.drimase.datacollector.Repository
 import com.drimase.datacollector.network.LogService
 import com.tbruyelle.rxpermissions3.RxPermissions
-import kotlinx.android.synthetic.main.activity_main.*
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import java.io.File
 import javax.inject.Inject
 
@@ -27,6 +19,7 @@ private const val TAG = "MainViewModel"
 @SuppressLint("RestrictedApi")
 class MainViewModel @Inject constructor(
         application: Application,
+        private val repository: Repository
 ) : AndroidViewModel(application) {
 
     @Inject
@@ -35,13 +28,16 @@ class MainViewModel @Inject constructor(
     @Inject
     lateinit var dirs : File
 
-    @Inject
-    lateinit var logService : LogService
-
     val liveText = MutableLiveData<String>("녹화")
 
     private var recording: Boolean = false
 
+    private val mDisposable = CompositeDisposable()
+
+    override fun onCleared() {
+        mDisposable.clear()
+        super.onCleared()
+    }
 
     @SuppressLint("RestrictedApi")
     fun onRecordBtnClick(videoCapture :VideoCapture) {

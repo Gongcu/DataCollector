@@ -6,13 +6,13 @@
     <data>
         <variable
             name="viewModel"
-            type="com.drimase.datacollector.main.MainViewModel" />
+            type="com.drimase.datacollector.ui.main.MainViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity">
+        tools:context=".ui.main.MainActivity">
 
         <LinearLayout
             android:id="@+id/location_layout"

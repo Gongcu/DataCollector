@@ -1,23 +1,19 @@
-package com.drimase.datacollector
+package com.drimase.datacollector.ui.main
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.util.Property.of
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.camera.core.*
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
+import com.drimase.datacollector.BaseActivity
+import com.drimase.datacollector.R
 import com.drimase.datacollector.databinding.ActivityMainBinding
 import com.drimase.datacollector.di.ViewModelFactory
-import com.drimase.datacollector.main.MainViewModel
 import com.tbruyelle.rxpermissions3.RxPermissions
-import dagger.android.AndroidInjection
-import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.Map.of
 import javax.inject.Inject
 
 class MainActivity : BaseActivity(),LifecycleOwner {
@@ -46,7 +42,7 @@ class MainActivity : BaseActivity(),LifecycleOwner {
         super.onCreate(savedInstanceState)
         val binding = DataBindingUtil.setContentView<ActivityMainBinding>(
             this,
-            R.layout.activity_main
+                R.layout.activity_main
         )
         binding.viewModel = mainViewModel
         binding.lifecycleOwner = this

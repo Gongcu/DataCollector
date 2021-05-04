@@ -2,14 +2,10 @@ package com.drimase.datacollector.di.module
 
 import android.app.Application
 import android.content.Context
-import androidx.annotation.NonNull
 import com.drimase.datacollector.BaseApplication
-import com.drimase.datacollector.MainActivity
-import com.drimase.datacollector.di.util.ActivityContext
-import com.drimase.datacollector.di.util.ActivityScope
+import com.drimase.datacollector.UserManager
 import com.drimase.datacollector.di.util.ApplicationContext
 import com.drimase.datacollector.network.LogService
-import com.tbruyelle.rxpermissions3.RxPermissions
 import dagger.Module
 import dagger.Provides
 import retrofit2.Retrofit
@@ -40,6 +36,13 @@ class AppModule {
     fun provideDirs(application: BaseApplication) : File {
         return application.externalMediaDirs.first()
     }
+
+    @Singleton
+    @Provides
+    fun provideUserManager():UserManager{
+        return UserManager()
+    }
+
 
     /**
      * Network Module
