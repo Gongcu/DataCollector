@@ -24,6 +24,6 @@ interface ActivityBuildModule {
     fun registrationActivity() : RegistrationActivity
 
     @ActivityScope
-    @ContributesAndroidInjector
+    @ContributesAndroidInjector(modules = [LoginModule::class])
     fun loginActivity() : LoginActivity
 }

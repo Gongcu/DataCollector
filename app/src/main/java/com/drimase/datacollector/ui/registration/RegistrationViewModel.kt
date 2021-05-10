@@ -1,6 +1,9 @@
 package com.drimase.datacollector.ui.registration
 
 import android.util.Log
+import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
+import android.widget.TextView
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.drimase.datacollector.Repository
@@ -37,7 +40,7 @@ class RegistrationViewModel @Inject constructor(
         val disposable = repository.registration(loginId,password)
             .subscribe({
                 result.value = RegistrationResult.SUCCESS
-                userManager.user = it
+                userManager.setUser(it)
             }, {
                 Log.d(TAG, "registration: ${it.message}")
                 result.value = RegistrationResult.SERVER_ERROR

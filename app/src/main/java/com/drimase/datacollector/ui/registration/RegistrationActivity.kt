@@ -14,7 +14,7 @@ import com.drimase.datacollector.ui.login.LoginActivity
 import com.drimase.datacollector.ui.main.MainViewModel
 import javax.inject.Inject
 
-class RegistrationActivity : BaseActivity() {
+class RegistrationActivity : BaseActivity<ActivityRegistrationBinding>() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -29,9 +29,7 @@ class RegistrationActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.inflate(layoutInflater,R.layout.activity_registration,null,false)
-        binding.viewModel = viewModel
-        binding.lifecycleOwner = this
+        getViewDataBinding().viewModel = viewModel
 
 
         viewModel.result.observe(this,{

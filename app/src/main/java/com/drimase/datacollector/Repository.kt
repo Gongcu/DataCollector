@@ -1,6 +1,8 @@
 package com.drimase.datacollector
 
-import com.drimase.datacollector.dto.Location
+import android.location.Location
+import com.drimase.datacollector.dto.AccidentProneArea
+import com.drimase.datacollector.dto.RegistrationRequest
 import com.drimase.datacollector.dto.User
 import com.drimase.datacollector.network.LogService
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -18,7 +20,8 @@ class Repository @Inject constructor(
 ){
 
     fun registration(loginId:String, password:String) : Single<User> {
-        return logService.registration(loginId, password)
+        val registrationRequest = RegistrationRequest(loginId,password)
+        return logService.registration(registrationRequest)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
     }
@@ -29,19 +32,34 @@ class Repository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    fun adminLogin(): Single<User>{
+        return logService.adminLogin()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+    }
+
+    fun detect(location: Location) : Single<List<AccidentProneArea>>{
+        return logService.detect(location.longitude,location.latitude)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+    }
+
     /*
     fun logLocation(userId: Int, location:Location): Single<Void>{
         return logService.logLocation(userId,location)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
     }
+    */
 
-    fun uploadVideo(userId:Int,videoId:Int, file: File): Single<Void>{
+    fun logImageLocation(userId:Int,longitude:Double,latitude:Double, file: File): Single<Unit>{
         val requestFile = RequestBody.create(MediaType.parse("multipart/from-data"), file)
-        val videoId = RequestBody.create(MediaType.parse("multipart/from-data"), videoId.toString())
-        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-        return logService.uploadVideo(userId,videoId,body)
+        val userId = RequestBody.create(MediaType.parse("multipart/from-data"), userId.toString())
+        val longitude = RequestBody.create(MediaType.parse("multipart/from-data"), longitude.toString())
+        val latitude = RequestBody.create(MediaType.parse("multipart/from-data"), latitude.toString())
+        val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
+        return logService.logImageLocation(userId,longitude,latitude,body)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
-    }*/
+    }
 }

@@ -1,6 +1,8 @@
 package com.drimase.datacollector.network
 
+import com.drimase.datacollector.dto.AccidentProneArea
 import com.drimase.datacollector.dto.Location
+import com.drimase.datacollector.dto.RegistrationRequest
 import com.drimase.datacollector.dto.User
 import io.reactivex.rxjava3.core.Single
 import okhttp3.MultipartBody
@@ -17,45 +19,28 @@ interface LogService {
 
     @POST("/user")
     fun registration(
-        @Body loginId:String,
-        @Body password: String
+        @Body registrationRequest: RegistrationRequest
     ): Single<User>
 
 
-    @POST("/log/start/{userId}")
-    fun logStart(
-        @Path("userId") userId: Int,
-    ): Single<Void>
+    @GET("/user/admin")
+    fun adminLogin(
+    ): Single<User>
 
 
-    /*
-    //아래 미완 -> 비디오 아이디 받아야 위치 저장 가능
-    @POST("/log/location/{userId}")
-    fun logLocation(
-        @Path("userId") userId: Int,
-        @Body location: Location
-    ): Single<Void>
-    */
+    @GET("/detect/{longitude}/{latitude}")
+    fun detect(
+            @Path("longitude") longitude: Double,
+            @Path("latitude") latitude: Double
+    ): Single<List<AccidentProneArea>>
 
-    //아래 미완 -> 비디오 아이디 받아야 위치 저장 가능
     @Multipart
-    @POST("/log/{userId}")
+    @POST("/log")
     fun logImageLocation(
-            @Path("userId") userId: Int,
+            @Part("userId") userId: RequestBody,
             @Part("longitude") longitude: RequestBody,
             @Part("latitude") latitude: RequestBody,
             @Part image: MultipartBody.Part
-    ): Single<Void>
+    ): Single<Unit>
 
-
-    /*
-    //아래 미완 -> 비디오 아이디 받아야 위치 저장 가능
-    @Multipart
-    @POST("/log/stop/{userId}")
-    fun uploadVideo(
-        @Path("userId") userId: Int,
-        @Part("videoId") videoId: RequestBody,
-        @Part video: MultipartBody.Part
-    ): Single<Void>
-    */
 }
