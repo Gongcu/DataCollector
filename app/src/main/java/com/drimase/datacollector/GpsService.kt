@@ -72,8 +72,4 @@ class GpsService @Inject constructor(
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
 
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 }

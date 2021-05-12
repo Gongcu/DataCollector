@@ -1,7 +1,9 @@
 package com.drimase.datacollector.ui.login
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.util.Log
+import androidx.camera.core.VideoCapture
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.drimase.datacollector.R
@@ -9,6 +11,7 @@ import com.drimase.datacollector.Repository
 import com.drimase.datacollector.UserManager
 import com.tbruyelle.rxpermissions3.RxPermissions
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import java.io.File
 import javax.inject.Inject
 
 private const val TAG = "LoginViewModel"
@@ -20,6 +23,7 @@ class LoginViewModel @Inject constructor(
     val login = MutableLiveData<LoginResult>()
     private var adminCounter = 0
     private val mDisposable = CompositeDisposable()
+
 
     override fun onCleared() {
         mDisposable.clear()
@@ -61,6 +65,8 @@ class LoginViewModel @Inject constructor(
     fun goToRegistration(){
         login.value = LoginResult.REGISTRATION
     }
+
+
 
     companion object{
         val permissions = arrayOf(

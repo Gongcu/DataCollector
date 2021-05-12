@@ -5,6 +5,8 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.databinding.DataBindingUtil
@@ -14,19 +16,19 @@ import com.drimase.datacollector.BaseActivity
 import com.drimase.datacollector.R
 import com.drimase.datacollector.databinding.ActivityMainBinding
 import com.drimase.datacollector.di.ViewModelFactory
+import com.drimase.datacollector.ui.login.LoginViewModel
 import com.tbruyelle.rxpermissions3.RxPermissions
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
 class MainActivity : BaseActivity<ActivityMainBinding>(),LifecycleOwner {
-    private lateinit var imageCapture: ImageCapture
-
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
 
     private val mainViewModel :MainViewModel by lazy {
         ViewModelProvider(this@MainActivity, viewModelFactory).get(MainViewModel::class.java)
     }
+
 
     override fun layoutRes(): Int {
         return R.layout.activity_main
@@ -38,19 +40,28 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),LifecycleOwner {
 
         startCamera()
 
-        record_button.setOnClickListener {
-            mainViewModel.takePhoto(imageCapture)
-        }
-
         mainViewModel.gpsService.locationLiveData.observe(this,{
-            latitude_text_view.text = it?.latitude.toString()
-            longitude_text_view.text = it?.longitude.toString()
+            //latitude_text_view.text = it?.latitude.toString()
+            //longitude_text_view.text = it?.longitude.toString()
             mainViewModel.detect()
         })
 
         mainViewModel.alert.observe(this,{
             generateSound()
             generateToast()
+        })
+
+
+        mainViewModel.progress.observe(this,{
+            progressbar.progress = it.toInt()
+        })
+
+        mainViewModel.networking.observe(this,{
+            if(it){
+                progressbar.visibility= View.VISIBLE
+            }else{
+                progressbar.visibility= View.INVISIBLE
+            }
         })
 
         mainViewModel.logAlert.observe(this,{
@@ -71,14 +82,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),LifecycleOwner {
             view_finder.setSurfaceTexture(it.surfaceTexture)
         }
 
-        val imageCaptureConfig= ImageCaptureConfig.Builder()
-            .setLensFacing(CameraX.LensFacing.BACK)
-            .build()
+        mainViewModel.setImageCapture()
+        mainViewModel.setVideoCapture()
 
-        imageCapture = ImageCapture(imageCaptureConfig)
-
-        CameraX.bindToLifecycle(this, preview, imageCapture)
+        CameraX.bindToLifecycle(this, preview, mainViewModel.imageCapture, mainViewModel.videoCapture)
     }
+
 
     private fun generateSound(){
         val mediaPlayer: MediaPlayer = MediaPlayer.create(applicationContext, R.raw.alert)

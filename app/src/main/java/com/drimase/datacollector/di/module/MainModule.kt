@@ -9,6 +9,7 @@ import com.drimase.datacollector.R
 import com.drimase.datacollector.ui.main.MainActivity
 import com.drimase.datacollector.di.util.ActivityContext
 import com.drimase.datacollector.di.util.ActivityScope
+import com.drimase.datacollector.ui.login.LoginActivity
 import com.tbruyelle.rxpermissions3.RxPermissions
 import dagger.Module
 import dagger.Provides
@@ -29,6 +30,8 @@ object MainModule {
     fun provideContext(activity: MainActivity) : Context {
         return activity
     }
+
+
 
 
 

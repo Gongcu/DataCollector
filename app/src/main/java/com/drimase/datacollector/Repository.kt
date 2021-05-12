@@ -1,10 +1,13 @@
 package com.drimase.datacollector
 
 import android.location.Location
+import android.util.Log
 import com.drimase.datacollector.dto.AccidentProneArea
 import com.drimase.datacollector.dto.RegistrationRequest
 import com.drimase.datacollector.dto.User
+import com.drimase.datacollector.dto.VideoResponse
 import com.drimase.datacollector.network.LogService
+import com.drimase.datacollector.util.ProgressRequestBody
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.core.Single
@@ -44,13 +47,6 @@ class Repository @Inject constructor(
                 .subscribeOn(Schedulers.io())
     }
 
-    /*
-    fun logLocation(userId: Int, location:Location): Single<Void>{
-        return logService.logLocation(userId,location)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-    }
-    */
 
     fun logImageLocation(userId:Int,longitude:Double,latitude:Double, file: File): Single<Unit>{
         val requestFile = RequestBody.create(MediaType.parse("multipart/from-data"), file)
@@ -61,5 +57,44 @@ class Repository @Inject constructor(
         return logService.logImageLocation(userId,longitude,latitude,body)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
+    }
+
+    fun startVideoLog(userId:Int) :Single<VideoResponse>{
+        return logService.startVideoLog(userId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+    }
+
+    fun logVideoFrameLocation(userId:Int,videoId:Int,longitude:Double,latitude:Double, file: File): Single<Unit>{
+        val image = RequestBody.create(MediaType.parse("multipart/from-data"), file)
+
+        val requestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("userId",userId.toString())
+                .addFormDataPart("videoId",videoId.toString())
+                .addFormDataPart("longitude",longitude.toString())
+                .addFormDataPart("latitude",latitude.toString())
+                .addFormDataPart("image",file.name,image)
+                .build()
+
+        return logService.logVideoFrameLocation(requestBody)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+    }
+
+    fun stopVideoLog(userId:Int,videoId:Int,longitude:Double,latitude:Double, videoPartFile: ProgressRequestBody): Single<Unit>{
+
+        val requestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("userId",userId.toString())
+                .addFormDataPart("videoId",videoId.toString())
+                .addFormDataPart("longitude",longitude.toString())
+                .addFormDataPart("latitude",latitude.toString())
+                .addFormDataPart("video",videoPartFile.getFilename(),videoPartFile)
+                .build()
+
+        return logService.stopVideoLog(requestBody)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
     }
 }

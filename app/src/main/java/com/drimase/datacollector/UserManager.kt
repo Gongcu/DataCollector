@@ -7,7 +7,9 @@ import javax.inject.Inject
 private const val TAG = "UserManager"
 
 class UserManager @Inject constructor(){
-    private lateinit var user: User
+    //현재 기록 시 유저 정보 필요 없음
+    private var user: User = User(0,"admin","test")
+    private var recordingVideoID:Int = -1
 
     @JvmName("setUser1")
     fun setUser(user:User){
@@ -15,7 +17,18 @@ class UserManager @Inject constructor(){
         this.user= user
     }
 
+
     fun getUserId() : Int{
         return user.id
     }
+
+    fun setRecordingVideoID(videoId:Int){
+        this.recordingVideoID= videoId
+    }
+
+
+    fun getRecordingVideoID() : Int{
+        return recordingVideoID
+    }
+
 }
