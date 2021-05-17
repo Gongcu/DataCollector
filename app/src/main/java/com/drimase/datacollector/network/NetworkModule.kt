@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 
-private const val BASE_URL = "http://14.49.44.176:80"
+private const val BASE_URL = "IP:PORT"
 
 @Module
 object NetworkModule {
