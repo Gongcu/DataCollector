@@ -1,20 +1,17 @@
 package com.drimase.datacollector.ui.main
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Application
 import android.location.Location
-import android.media.MediaPlayer
+import android.location.LocationListener
 import android.util.Log
-import android.widget.Toast
 import androidx.camera.core.*
 import androidx.lifecycle.*
 import com.drimase.datacollector.*
 import com.drimase.datacollector.dto.AccidentProneArea
-import com.drimase.datacollector.dto.User
-import com.drimase.datacollector.ui.login.LoginViewModel
+import com.drimase.datacollector.service.GpsService
+import com.drimase.datacollector.service.UserManager
 import com.drimase.datacollector.util.ProgressRequestBody
-import com.tbruyelle.rxpermissions3.RxPermissions
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
@@ -44,32 +41,35 @@ class MainViewModel @Inject constructor(
 
     val logAlert = MutableLiveData<LogAlert>()
 
-    private val location : MutableLiveData<Location> by lazy{
-        gpsService.locationLiveData
-    }
+    @Inject
+    lateinit var location: MutableLiveData<Location>
 
-    val accidentProneArea  = MutableLiveData<List<AccidentProneArea>>()
+
     val alert = MutableLiveData<Unit>()
+    private val accidentProneArea  = MutableLiveData<List<AccidentProneArea>>()
     private val detectedAPA = ArrayList<AccidentProneArea>()
     private val mDisposable = CompositeDisposable()
 
-    val networking = MutableLiveData<Boolean>(false)
-    val progress = MutableLiveData<Float>(0.0f)
+    val onProgress = MutableLiveData<Boolean>(false)
+    val progressValue = MutableLiveData<Float>(0.0f)
+
 
     private val locationObserver = Observer<Location> {
-        Log.i(TAG,"LOCATION OBSERVER : ${recording} ${userManager.getRecordingVideoID()}")
         if (recording && userManager.getRecordingVideoID() > 0) {
-            captureFrame()
+            captureVideoFrame()
         }
     }
 
-
+    //단일 사진 촬영
     fun takePhoto(){
+        if(locationServiceUnavailable() || onUpload())
+            return
+
         val file = File(dirs,"${System.currentTimeMillis()}.jpeg")
         imageCapture.takePicture(file, object : ImageCapture.OnImageSavedListener {
             override fun onImageSaved(file: File) {
                 Log.i(TAG, "Image File : $file")
-                logImageLocation(file)
+                logFrameLocation(file,LogType.SINGLE_FRAME)
             }
 
             override fun onError(
@@ -85,31 +85,12 @@ class MainViewModel @Inject constructor(
     @SuppressLint("RestrictedApi")
     fun onRecordClick(){
         if(recording){
-            recordText.value = "녹화"
-            videoCapture.stopRecording()
-            location.removeObserver(locationObserver)
+            stopVideoLog()
         }else{
-            recordText.value = "중지"
-            defineRecordingVideoId()
-            location.observeForever(locationObserver)
-            val file = File(dirs,"${System.currentTimeMillis()}.mp4")
-            videoCapture.startRecording(file, object : VideoCapture.OnVideoSavedListener {
-                override fun onVideoSaved(file: File) {
-                    Log.i(TAG, "Video File : $file")
-                    stopVideoLog(file)
-                }
-
-                override fun onError(
-                        useCaseError: VideoCapture.UseCaseError?,
-                        message: String?,
-                        cause: Throwable?
-                ) {
-                    Log.i(TAG, "Video Error: $message")
-                }
-            })
-
+            if(locationServiceUnavailable() || onUpload())
+                return
+            startVideoLog()
         }
-        recording=!recording
     }
 
     fun detect(){
@@ -126,28 +107,37 @@ class MainViewModel @Inject constructor(
         }
     }
 
-
-
-
-    private fun logImageLocation(file: File){
-        val location = gpsService.locationLiveData.value!!
-        val disposable = repository.logImageLocation(
-                userManager.getUserId(),
-                location.longitude,
-                location.latitude,
-                file
-        ).subscribe(
-                {
-                    logAlert.value = LogAlert.SUCCESS
-                },
-                {
-                    logAlert.value = LogAlert.FAIL
-                    it.stackTrace
-                })
-        mDisposable.add(disposable)
+    fun stopVideoLog(){
+        location.removeObserver(locationObserver)
+        recordText.value = "녹화"
+        videoCapture.stopRecording()
+        recording=!recording
     }
 
-    private fun defineRecordingVideoId(){
+    private fun startVideoLog(){
+        recording=!recording
+        recordText.value = "중지"
+        setRecordingVideoIdToUserManager()
+        location.observeForever(locationObserver)
+        val file = File(dirs,"${System.currentTimeMillis()}.mp4")
+        videoCapture.startRecording(file, object : VideoCapture.OnVideoSavedListener {
+            override fun onVideoSaved(file: File) {
+                Log.i(TAG, "Video File : $file")
+                onVideoStopped(file)
+            }
+
+            override fun onError(
+                    useCaseError: VideoCapture.UseCaseError?,
+                    message: String?,
+                    cause: Throwable?
+            ) {
+                Log.i(TAG, "Video Error: $message")
+            }
+        })
+    }
+
+
+    private fun setRecordingVideoIdToUserManager(){
         val disposable = repository.startVideoLog(userManager.getUserId()).subscribe({
             userManager.setRecordingVideoID(it.id)
         },{
@@ -156,13 +146,14 @@ class MainViewModel @Inject constructor(
         mDisposable.add(disposable)
     }
 
-    private fun captureFrame(){
+    //영상 프레임 캡쳐
+    private fun captureVideoFrame(){
         val file = File(dirs,"${System.currentTimeMillis()}.jpeg")
 
         imageCapture.takePicture(file, object : ImageCapture.OnImageSavedListener {
             override fun onImageSaved(file: File) {
                 Log.i(TAG, "Image File : $file")
-                logVideoFrameLocation(file)
+                logFrameLocation(file,LogType.SINGLE_FRAME)
             }
 
             override fun onError(
@@ -175,11 +166,13 @@ class MainViewModel @Inject constructor(
         })
     }
 
-    private fun logVideoFrameLocation(file: File){
-        val location = gpsService.locationLiveData.value!!
-        val disposable = repository.logVideoFrameLocation(
+    //위치 및 사진 정보 서버로 전송
+    private fun logFrameLocation(file: File, logType: LogType){
+        val location = location.value!!
+        val videoId = if(logType == LogType.SINGLE_FRAME) SINGLE_IMAGE else userManager.getRecordingVideoID()
+        val disposable = repository.logFrameLocation(
                 userManager.getUserId(),
-                userManager.getRecordingVideoID(),
+                videoId,
                 location.longitude,
                 location.latitude,
                 file
@@ -194,15 +187,16 @@ class MainViewModel @Inject constructor(
         mDisposable.add(disposable)
     }
 
-    private fun stopVideoLog(file:File){
-        networking.postValue(true)
-        val location = gpsService.locationLiveData.value!!
+    //비디오 종료 시 API 호출하여 서버로 전송
+    private fun onVideoStopped(file:File){
+        onProgress.postValue(true)
+        val location = location.value!!
         val videoPartFile = ProgressRequestBody(file)
         videoPartFile.getProgressSubject()
                 .subscribeOn(Schedulers.io())
                 .subscribe {
                     Log.i("PROGRESS", "stopVideoLog: $it")
-                    progress.postValue(it)
+                    progressValue.postValue(it)
                 }
 
         val disposable = repository.stopVideoLog(
@@ -213,10 +207,10 @@ class MainViewModel @Inject constructor(
                 videoPartFile
         ).subscribe({
             logAlert.value = LogAlert.SUCCESS
-            networking.value = false
+            onProgress.value = false
         }, {
-            logAlert.value = LogAlert.FAIL
-            networking.value = false
+            logAlert.value = LogAlert.VIDEO_LOG_FAIL
+            onProgress.value = false
             Log.i(TAG, "stopVideoLog: ${it.message}")
         })
         mDisposable.add(disposable)
@@ -249,13 +243,37 @@ class MainViewModel @Inject constructor(
         videoCapture = VideoCapture(videoCaptureConfig)
     }
 
+    private fun locationServiceUnavailable() : Boolean{
+        if(location.value == null){
+            logAlert.value = LogAlert.LOCATION_UNAVAILABLE
+            return true
+        }
+        return false
+    }
+
+    private fun onUpload() : Boolean{
+        if(onProgress.value == true){
+            logAlert.value = LogAlert.ON_PROGRESS
+            return true
+        }
+        return false
+    }
+
     override fun onCleared() {
         mDisposable.clear()
         super.onCleared()
     }
 
+    companion object{
+        const val SINGLE_IMAGE = 0
+    }
+
 }
 
 enum class LogAlert {
-    SUCCESS,FAIL
+    SUCCESS,FAIL,FRAME_LOG_FAIL,VIDEO_LOG_FAIL,LOCATION_UNAVAILABLE,ON_PROGRESS
+}
+
+enum class LogType {
+    SINGLE_FRAME, VIDEO_FRAME
 }

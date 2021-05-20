@@ -1,16 +1,15 @@
-package com.drimase.datacollector.network
+package com.drimase.datacollector.di.module
 
+import com.drimase.datacollector.service.LogService
 import dagger.Module
 import dagger.Provides
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 
-private const val BASE_URL = "IP:PORT"
+private const val BASE_URL = "http://14.49.44.176:80"
 
 @Module
 object NetworkModule {
@@ -32,7 +31,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofitService(retrofit: Retrofit) : LogService{
+    fun provideRetrofitService(retrofit: Retrofit) : LogService {
         return retrofit.create(LogService::class.java)
     }
 }

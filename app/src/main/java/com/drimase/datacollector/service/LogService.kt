@@ -1,4 +1,4 @@
-package com.drimase.datacollector.network
+package com.drimase.datacollector.service
 
 import com.drimase.datacollector.dto.*
 import io.reactivex.rxjava3.core.Single
@@ -40,13 +40,6 @@ interface LogService {
             @Part image: MultipartBody.Part
     ): Single<Unit>
 
-
-    @GET("/log/video/start/{userId}")
-    fun startVideoLog(
-            @Path("userId") userId: Int,
-    ): Single<VideoResponse>
-
-
     @Multipart
     @POST("/log/video/frame")
     fun logVideoFrameLocation(
@@ -57,22 +50,13 @@ interface LogService {
             @Part image: MultipartBody.Part
     ): Single<Unit>
 
-    @POST("/log/video/frame")
-    fun logVideoFrameLocation(
-            @Body requestBody: MultipartBody
-    ): Single<Unit>
 
-    /*
-    @Multipart
-    @POST("/log/video/stop")
-    fun stopVideoLog(
-            @Part("userId") userId: RequestBody,
-            @Part("videoId") videoId: RequestBody,
-            @Part("longitude") longitude: RequestBody,
-            @Part("latitude") latitude: RequestBody,
-            @Part video: MultipartBody.Part
-    ): Single<Unit>
-    */
+    @GET("/log/video/start/{userId}")
+    fun startVideoLog(
+            @Path("userId") userId: Int,
+    ): Single<VideoResponse>
+
+
 
     @POST("/log/video/stop")
     fun stopVideoLog(

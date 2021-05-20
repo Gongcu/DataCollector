@@ -40,9 +40,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),LifecycleOwner {
 
         startCamera()
 
-        mainViewModel.gpsService.locationLiveData.observe(this,{
-            //latitude_text_view.text = it?.latitude.toString()
-            //longitude_text_view.text = it?.longitude.toString()
+        mainViewModel.location.observe(this,{
             mainViewModel.detect()
         })
 
@@ -52,24 +50,32 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),LifecycleOwner {
         })
 
 
-        mainViewModel.progress.observe(this,{
-            progressbar.progress = it.toInt()
+        mainViewModel.progressValue.observe(this,{
+            progressbar.setProgress(it.toInt(),true)
         })
 
-        mainViewModel.networking.observe(this,{
-            if(it){
+        mainViewModel.onProgress.observe(this,{
+            if(it)
                 progressbar.visibility= View.VISIBLE
-            }else{
+            else
                 progressbar.visibility= View.INVISIBLE
-            }
         })
 
         mainViewModel.logAlert.observe(this,{
             when(it){
                 LogAlert.SUCCESS -> Toast.makeText(this,"기록 성공",Toast.LENGTH_SHORT).show()
                 LogAlert.FAIL -> Toast.makeText(this,"기록 실패",Toast.LENGTH_SHORT).show()
+                LogAlert.LOCATION_UNAVAILABLE -> Toast.makeText(this,"위치 정보를 가져올 수 없습니다",Toast.LENGTH_SHORT).show()
+                LogAlert.ON_PROGRESS -> Toast.makeText(this,"현재 영상을 업로드 중입니다.",Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if(mainViewModel.recording) {
+            mainViewModel.stopVideoLog()
+        }
     }
 
 

@@ -1,4 +1,4 @@
-package com.drimase.datacollector
+package com.drimase.datacollector.service
 
 import android.util.Log
 import com.drimase.datacollector.dto.User

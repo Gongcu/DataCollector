@@ -1,19 +1,18 @@
 package com.drimase.datacollector.di.module
 
 import android.content.Context
-import android.media.MediaPlayer
-import androidx.fragment.app.FragmentActivity
+import android.location.Location
+import android.location.LocationListener
+import android.os.Bundle
+import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.drimase.datacollector.BaseApplication
-import com.drimase.datacollector.GpsService
-import com.drimase.datacollector.R
+import com.drimase.datacollector.service.GpsService
 import com.drimase.datacollector.ui.main.MainActivity
 import com.drimase.datacollector.di.util.ActivityContext
 import com.drimase.datacollector.di.util.ActivityScope
-import com.drimase.datacollector.ui.login.LoginActivity
-import com.tbruyelle.rxpermissions3.RxPermissions
 import dagger.Module
 import dagger.Provides
-import java.io.File
 
 @Module
 object MainModule {
@@ -34,10 +33,9 @@ object MainModule {
 
 
 
-
     @Provides
     @ActivityScope
-    fun provideGpsService(application: BaseApplication) : GpsService{
-        return GpsService(application)
+    fun provideGpsService(application: BaseApplication, location: MutableLiveData<Location>) : GpsService {
+        return GpsService(application,location)
     }
 }

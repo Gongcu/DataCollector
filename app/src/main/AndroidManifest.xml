@@ -20,7 +20,7 @@
         </activity>
         <activity android:name=".ui.registration.RegistrationActivity" />
         <activity android:name=".ui.login.LoginActivity"></activity>
-        <activity android:name=".ui.main.MainActivity"/>
+        <activity android:name=".ui.main.MainActivity" android:screenOrientation="portrait"/>
 
     </application>
     <uses-feature android:name="android.hardware.camera" />

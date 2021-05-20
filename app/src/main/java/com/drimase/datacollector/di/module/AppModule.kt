@@ -2,18 +2,16 @@ package com.drimase.datacollector.di.module
 
 import android.app.Application
 import android.content.Context
+import android.location.Location
+import androidx.lifecycle.MutableLiveData
 import com.drimase.datacollector.BaseApplication
 import com.drimase.datacollector.R
-import com.drimase.datacollector.UserManager
 import com.drimase.datacollector.di.util.ActivityScope
+import com.drimase.datacollector.service.UserManager
 import com.drimase.datacollector.di.util.ApplicationContext
-import com.drimase.datacollector.network.LogService
-import com.drimase.datacollector.network.NetworkModule
+import com.drimase.datacollector.service.CustomLocationListener
 import dagger.Module
 import dagger.Provides
-import retrofit2.Retrofit
-import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
-import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import javax.inject.Singleton
 
@@ -22,6 +20,8 @@ import javax.inject.Singleton
     NetworkModule::class
 ]) //ViewModelModule을 App 범위로 관리 -> 어디서든 ViewModelFactory로 ViewModel 생성가능
 class AppModule {
+    private val location = MutableLiveData<Location>()
+
     @Provides
     @Singleton
     fun provideApp(application: BaseApplication) : Application{
@@ -37,8 +37,14 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideUserManager():UserManager{
+    fun provideUserManager(): UserManager {
         return UserManager()
+    }
+
+    @Singleton
+    @Provides
+    fun provideLocationLiveData() : MutableLiveData<Location> {
+        return location
     }
 
     @Provides

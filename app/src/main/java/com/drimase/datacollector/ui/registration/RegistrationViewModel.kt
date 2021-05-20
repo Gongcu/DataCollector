@@ -1,14 +1,10 @@
 package com.drimase.datacollector.ui.registration
 
 import android.util.Log
-import android.view.KeyEvent
-import android.view.inputmethod.EditorInfo
-import android.widget.TextView
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.drimase.datacollector.Repository
-import com.drimase.datacollector.UserManager
-import com.drimase.datacollector.dto.User
+import com.drimase.datacollector.service.UserManager
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import javax.inject.Inject
 

@@ -3,12 +3,9 @@ package com.drimase.datacollector.ui
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import com.drimase.datacollector.R
-import com.drimase.datacollector.ui.login.LoginResult
-import com.drimase.datacollector.ui.login.LoginViewModel
 import com.drimase.datacollector.ui.main.MainActivity
 import com.tbruyelle.rxpermissions3.RxPermissions
 import dagger.android.support.DaggerAppCompatActivity
@@ -52,7 +49,7 @@ class SplashActivity : DaggerAppCompatActivity() {
 
     private fun goToMainActivity(){
         val intent = Intent(this, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(intent)
     }
 
