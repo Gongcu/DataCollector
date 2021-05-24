@@ -21,6 +21,7 @@ class CustomLocationListener  constructor(
     }
 
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+        Log.d(TAG, status.toString())
     }
 
     override fun onProviderEnabled(provider: String) {

@@ -1,6 +1,7 @@
 package com.drimase.datacollector.service
 
 import android.Manifest
+import android.app.Application
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -27,7 +28,6 @@ class GpsService @Inject constructor(
 ) : LifecycleService(){
 
     private var locationListener: CustomLocationListener = CustomLocationListener(location)
-
     private val locationManager = application.getSystemService(LOCATION_SERVICE) as LocationManager
     private var firstInit = true
 
@@ -69,10 +69,36 @@ class GpsService @Inject constructor(
     }
 
     private fun getBestProvider() : String?{
-        val criteria = Criteria()
-        criteria.accuracy = Criteria.ACCURACY_FINE
-        criteria.isCostAllowed = false
-        return locationManager!!.getBestProvider(criteria,true)
+        var networkLocation : Location? = null
+        var gpsLocation : Location? = null
+        val criteria = Criteria().apply {
+            powerRequirement = Criteria.POWER_LOW
+            accuracy = Criteria.ACCURACY_FINE
+            isSpeedRequired = true
+            isAltitudeRequired = false
+            isBearingRequired = false
+            isCostAllowed = false
+        }
+
+        if (ActivityCompat.checkSelfPermission(
+                application,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                application,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            networkLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            gpsLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+
+        }
+
+        if(gpsLocation == null && networkLocation==null){
+            return locationManager!!.getBestProvider(criteria,true)
+        }else if(networkLocation == null)
+            return LocationManager.GPS_PROVIDER
+        else
+            return LocationManager.NETWORK_PROVIDER
     }
 
 }

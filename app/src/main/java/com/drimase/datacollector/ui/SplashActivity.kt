@@ -1,14 +1,17 @@
 package com.drimase.datacollector.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import com.drimase.datacollector.R
 import com.drimase.datacollector.ui.main.MainActivity
 import com.tbruyelle.rxpermissions3.RxPermissions
 import dagger.android.support.DaggerAppCompatActivity
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import javax.inject.Inject
 
 class SplashActivity : DaggerAppCompatActivity() {
@@ -22,18 +25,20 @@ class SplashActivity : DaggerAppCompatActivity() {
 
     }
 
+    @SuppressLint("ShowToast")
     private fun requestPermission(rxPermissions: RxPermissions) {
         if(!grantCheck(rxPermissions))
             rxPermissions
-                    .request(*permissions).subscribe { grant ->
-                        if (!grant) {
-                            Toast.makeText(
-                                    MainActivity::class.java as Context,
-                                    "전체 권한을 허용해주세요.",
-                                    Toast.LENGTH_LONG
-                            )
-                        }else{
+                .requestEachCombined(*permissions)
+                .subscribe { permission ->
+                        if (permission.granted) {
                             goToMainActivity()
+                        }else{
+                            Toast.makeText(
+                                this,
+                                "앱 설정에서 전체 권한을 허용해야 앱을 이용할 수 있습니다.",
+                                Toast.LENGTH_LONG
+                            )
                         }
                     }
         else{
