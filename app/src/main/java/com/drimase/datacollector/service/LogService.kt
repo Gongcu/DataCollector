@@ -31,25 +31,16 @@ interface LogService {
             @Path("latitude") latitude: Double
     ): Single<List<AccidentProneArea>>
 
-    @Multipart
+
     @POST("/log/image")
     fun logImageLocation(
-            @Part("userId") userId: RequestBody,
-            @Part("longitude") longitude: RequestBody,
-            @Part("latitude") latitude: RequestBody,
-            @Part image: MultipartBody.Part
+            @Body requestBody: MultipartBody
     ): Single<Unit>
 
-    @Multipart
     @POST("/log/video/frame")
     fun logVideoFrameLocation(
-            @Part("userId") userId: RequestBody,
-            @Part("videoId") videoId: RequestBody,
-            @Part("longitude") longitude: RequestBody,
-            @Part("latitude") latitude: RequestBody,
-            @Part image: MultipartBody.Part
+            @Body requestBody: MultipartBody
     ): Single<Unit>
-
 
     @GET("/log/video/start/{userId}")
     fun startVideoLog(

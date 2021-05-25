@@ -11,8 +11,10 @@ import com.drimase.datacollector.service.GpsService
 import com.drimase.datacollector.ui.main.MainActivity
 import com.drimase.datacollector.di.util.ActivityContext
 import com.drimase.datacollector.di.util.ActivityScope
+import com.drimase.datacollector.service.SensorManager
 import dagger.Module
 import dagger.Provides
+import javax.inject.Singleton
 
 @Module
 object MainModule {
@@ -32,10 +34,15 @@ object MainModule {
 
 
 
+    @Provides
+    @ActivityScope
+    fun provideGpsService(application: BaseApplication, location:MutableLiveData<Location>) : GpsService {
+        return GpsService(application,location)
+    }
 
     @Provides
     @ActivityScope
-    fun provideGpsService(application: BaseApplication, location: MutableLiveData<Location>) : GpsService {
-        return GpsService(application,location)
+    fun provideSensorService(application: BaseApplication, altitude:MutableLiveData<Float>) : SensorManager{
+        return SensorManager(application,altitude)
     }
 }

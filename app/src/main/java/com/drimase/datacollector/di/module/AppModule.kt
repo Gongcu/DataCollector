@@ -21,6 +21,7 @@ import javax.inject.Singleton
 ]) //ViewModelModule을 App 범위로 관리 -> 어디서든 ViewModelFactory로 ViewModel 생성가능
 class AppModule {
     private val location = MutableLiveData<Location>()
+    private val altitude = MutableLiveData<Float>()
 
     @Provides
     @Singleton
@@ -45,6 +46,12 @@ class AppModule {
     @Provides
     fun provideLocationLiveData() : MutableLiveData<Location> {
         return location
+    }
+
+    @Singleton
+    @Provides
+    fun provideAltitudeLiveData() : MutableLiveData<Float> {
+        return altitude
     }
 
     @Provides

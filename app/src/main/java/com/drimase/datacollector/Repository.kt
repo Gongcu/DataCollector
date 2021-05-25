@@ -55,32 +55,39 @@ class Repository @Inject constructor(
                 .subscribeOn(Schedulers.io())
     }
 
-    fun logFrameLocation(userId:Int,videoId:Int,longitude:Double,latitude:Double, file: File): Single<Unit>{
+    fun logFrameLocation(userId:Int,videoId:Int,longitude:Double,latitude:Double,altitude:Float, file: File): Single<Unit>{
         val requestFile = RequestBody.create(MediaType.parse("multipart/from-data"), file)
-        val formUserId = RequestBody.create(MediaType.parse("multipart/from-data"), userId.toString())
-        val formVideoId = RequestBody.create(MediaType.parse("multipart/from-data"), videoId.toString())
-        val formLongitude = RequestBody.create(MediaType.parse("multipart/from-data"), longitude.toString())
-        val formLatitude = RequestBody.create(MediaType.parse("multipart/from-data"), latitude.toString())
-        val formFile = MultipartBody.Part.createFormData("image", file.name, requestFile)
 
-        var response : Single<Unit> =
-                if(videoId == MainViewModel.SINGLE_IMAGE)
-                    logService.logImageLocation(formUserId,formLongitude,formLatitude,formFile)
-                else
-                    logService.logVideoFrameLocation(formUserId,formVideoId,formLongitude,formLatitude,formFile)
-
-        return response
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-    }
-
-    fun stopVideoLog(userId:Int,videoId:Int,longitude:Double,latitude:Double, videoPartFile: ProgressRequestBody): Single<Unit>{
         val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("userId",userId.toString())
                 .addFormDataPart("videoId",videoId.toString())
                 .addFormDataPart("longitude",longitude.toString())
                 .addFormDataPart("latitude",latitude.toString())
+                .addFormDataPart("altitude",altitude.toString())
+                .addFormDataPart("image",file.name,requestFile)
+                .build()
+
+
+        var response : Single<Unit> =
+                if(videoId == MainViewModel.SINGLE_IMAGE)
+                    logService.logImageLocation(requestBody)
+                else
+                    logService.logVideoFrameLocation(requestBody)
+
+        return response
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+    }
+
+    fun stopVideoLog(userId:Int,videoId:Int,longitude:Double,latitude:Double,altitude: Float,videoPartFile: ProgressRequestBody): Single<Unit>{
+        val requestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("userId",userId.toString())
+                .addFormDataPart("videoId",videoId.toString())
+                .addFormDataPart("longitude",longitude.toString())
+                .addFormDataPart("latitude",latitude.toString())
+                .addFormDataPart("altitude",altitude.toString())
                 .addFormDataPart("video",videoPartFile.getFilename(),videoPartFile)
                 .build()
 

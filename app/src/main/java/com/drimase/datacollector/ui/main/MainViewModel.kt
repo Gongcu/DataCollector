@@ -3,13 +3,13 @@ package com.drimase.datacollector.ui.main
 import android.annotation.SuppressLint
 import android.app.Application
 import android.location.Location
-import android.location.LocationListener
 import android.util.Log
 import androidx.camera.core.*
 import androidx.lifecycle.*
 import com.drimase.datacollector.*
 import com.drimase.datacollector.dto.AccidentProneArea
 import com.drimase.datacollector.service.GpsService
+import com.drimase.datacollector.service.SensorManager
 import com.drimase.datacollector.service.UserManager
 import com.drimase.datacollector.util.ProgressRequestBody
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -34,6 +34,9 @@ class MainViewModel @Inject constructor(
     lateinit var gpsService: GpsService
 
     @Inject
+    lateinit var sensorManager: SensorManager
+
+    @Inject
     lateinit var dirs : File
 
     var recording = false
@@ -43,7 +46,8 @@ class MainViewModel @Inject constructor(
 
     @Inject
     lateinit var location: MutableLiveData<Location>
-
+    @Inject
+    lateinit var altitude: MutableLiveData<Float>
 
     val alert = MutableLiveData<Unit>()
     private val accidentProneArea  = MutableLiveData<List<AccidentProneArea>>()
@@ -169,12 +173,14 @@ class MainViewModel @Inject constructor(
     //위치 및 사진 정보 서버로 전송
     private fun logFrameLocation(file: File, logType: LogType){
         val location = location.value!!
+        val altitude = altitude.value!!
         val videoId = if(logType == LogType.SINGLE_FRAME) SINGLE_IMAGE else userManager.getRecordingVideoID()
         val disposable = repository.logFrameLocation(
                 userManager.getUserId(),
                 videoId,
                 location.longitude,
                 location.latitude,
+                altitude,
                 file
         ).subscribe({
             logAlert.value = LogAlert.SUCCESS
@@ -191,6 +197,7 @@ class MainViewModel @Inject constructor(
     private fun onVideoStopped(file:File){
         onProgress.postValue(true)
         val location = location.value!!
+        val altitude = altitude.value!!
         val videoPartFile = ProgressRequestBody(file)
         videoPartFile.getProgressSubject()
                 .subscribeOn(Schedulers.io())
@@ -204,6 +211,7 @@ class MainViewModel @Inject constructor(
                 userManager.getRecordingVideoID(),
                 location.longitude,
                 location.latitude,
+                altitude,
                 videoPartFile
         ).subscribe({
             logAlert.value = LogAlert.SUCCESS
