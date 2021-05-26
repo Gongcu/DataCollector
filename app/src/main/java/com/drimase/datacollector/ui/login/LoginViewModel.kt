@@ -1,18 +1,18 @@
 package com.drimase.datacollector.ui.login
 
-import android.Manifest
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.drimase.datacollector.Repository
+import com.drimase.datacollector.repository.Repository
+import com.drimase.datacollector.service.SharedPreferencesManager
 import com.drimase.datacollector.service.UserManager
-import com.tbruyelle.rxpermissions3.RxPermissions
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import javax.inject.Inject
 
 private const val TAG = "LoginViewModel"
 
 class LoginViewModel @Inject constructor(
+    private val sharedPreferencesManager: SharedPreferencesManager,
     private val userManager: UserManager,
     private val repository: Repository
 ) :ViewModel(){
@@ -26,6 +26,7 @@ class LoginViewModel @Inject constructor(
         super.onCleared()
     }
 
+    //HIDDEN ADMIN LOGIN
     fun addCount(){
         adminCounter+=1
         if(adminCounter == 3) {
@@ -44,6 +45,8 @@ class LoginViewModel @Inject constructor(
         repository.login(loginId,password)
             .subscribe({
                 userManager.setUser(it)
+                sharedPreferencesManager.setUserId(it.id)
+                sharedPreferencesManager.setUserName(it.loginId)
                 login.value = LoginResult.SUCCESS
             }, {
                 login.value = LoginResult.NOT_MATCH
@@ -51,28 +54,11 @@ class LoginViewModel @Inject constructor(
             })
     }
 
-    fun grantCheck(rxPermissions: RxPermissions): Boolean {
-        for (p in permissions)
-            if (!rxPermissions.isGranted(p))
-                return false
-        return true
-    }
 
     fun goToRegistration(){
         login.value = LoginResult.REGISTRATION
     }
 
-
-
-    companion object{
-        val permissions = arrayOf(
-                Manifest.permission.CAMERA,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.RECORD_AUDIO
-        )
-    }
 }
 
 enum class LoginResult{

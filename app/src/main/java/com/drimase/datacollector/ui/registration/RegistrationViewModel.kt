@@ -3,7 +3,7 @@ package com.drimase.datacollector.ui.registration
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.drimase.datacollector.Repository
+import com.drimase.datacollector.repository.Repository
 import com.drimase.datacollector.service.UserManager
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import javax.inject.Inject
@@ -42,6 +42,10 @@ class RegistrationViewModel @Inject constructor(
                 result.value = RegistrationResult.SERVER_ERROR
             })
         mDisposable.add(disposable)
+    }
+
+    fun goToLoginActivity(){
+        result.value = RegistrationResult.SUCCESS
     }
 
 }

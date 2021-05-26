@@ -2,19 +2,15 @@ package com.drimase.datacollector.di.module
 
 import android.content.Context
 import android.location.Location
-import android.location.LocationListener
-import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.drimase.datacollector.BaseApplication
-import com.drimase.datacollector.service.GpsService
+import com.drimase.datacollector.base.BaseApplication
 import com.drimase.datacollector.ui.main.MainActivity
 import com.drimase.datacollector.di.util.ActivityContext
 import com.drimase.datacollector.di.util.ActivityScope
+import com.drimase.datacollector.service.GpsService
 import com.drimase.datacollector.service.SensorManager
 import dagger.Module
 import dagger.Provides
-import javax.inject.Singleton
 
 @Module
 object MainModule {
@@ -31,7 +27,6 @@ object MainModule {
     fun provideContext(activity: MainActivity) : Context {
         return activity
     }
-
 
 
     @Provides

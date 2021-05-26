@@ -1,29 +1,21 @@
 package com.drimase.datacollector.ui.login
 
-import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import com.drimase.datacollector.BaseActivity
+import com.drimase.datacollector.base.BaseActivity
 import com.drimase.datacollector.R
 import com.drimase.datacollector.databinding.ActivityLoginBinding
 import com.drimase.datacollector.di.ViewModelFactory
 import com.drimase.datacollector.ui.main.MainActivity
 import com.drimase.datacollector.ui.registration.RegistrationActivity
-import com.tbruyelle.rxpermissions3.RxPermissions
 import javax.inject.Inject
-
-private const val TAG = "LoginActivity"
 
 class LoginActivity : BaseActivity<ActivityLoginBinding>() {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
-
-    @Inject
-    lateinit var rxPermissions: RxPermissions
 
     private val viewModel: LoginViewModel by lazy {
         ViewModelProvider(this@LoginActivity, viewModelFactory).get(LoginViewModel::class.java)
@@ -36,8 +28,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         super.getViewDataBinding().viewModel = viewModel
-
-        requestPermission()
 
         viewModel.login.observe(this, {
             when (it) {
@@ -52,23 +42,8 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
 
     private fun startActivity(activity: Class<Activity>) {
         val intent = Intent(this, activity)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(intent)
-    }
-
-    private fun requestPermission() {
-        if(!viewModel.grantCheck(rxPermissions))
-            rxPermissions
-                    .request(*LoginViewModel.permissions).subscribe { grant ->
-                        if (!grant) {
-                            Toast.makeText(
-                                    MainActivity::class.java as Context,
-                                    "전체 권한을 허용해주세요.",
-                                    Toast.LENGTH_LONG
-                            )
-                            requestPermission()
-                        }
-                    }
     }
 
     companion object {

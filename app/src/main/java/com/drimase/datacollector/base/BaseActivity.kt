@@ -1,13 +1,10 @@
-package com.drimase.datacollector
+package com.drimase.datacollector.base
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.annotation.Nullable
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import com.drimase.datacollector.ui.main.MainActivity
 import dagger.android.support.DaggerAppCompatActivity
 
 

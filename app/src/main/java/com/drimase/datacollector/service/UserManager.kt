@@ -17,10 +17,14 @@ class UserManager @Inject constructor(){
         this.user= user
     }
 
+    fun getUserName() : String{
+        return user.loginId
+    }
 
     fun getUserId() : Int{
         return user.id
     }
+
 
     fun setRecordingVideoID(videoId:Int){
         this.recordingVideoID= videoId

@@ -6,12 +6,11 @@ import android.location.Location
 import android.util.Log
 import androidx.camera.core.*
 import androidx.lifecycle.*
-import com.drimase.datacollector.*
 import com.drimase.datacollector.dto.AccidentProneArea
-import com.drimase.datacollector.service.GpsService
-import com.drimase.datacollector.service.SensorManager
-import com.drimase.datacollector.service.UserManager
-import com.drimase.datacollector.util.ProgressRequestBody
+import com.drimase.datacollector.service.*
+import com.drimase.datacollector.dto.ProgressRequestBody
+import com.drimase.datacollector.dto.VideoRecord
+import com.drimase.datacollector.repository.Repository
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
@@ -21,8 +20,8 @@ private const val TAG = "MainViewModel"
 
 @SuppressLint("RestrictedApi")
 class MainViewModel @Inject constructor(
-        application: Application,
-        private val repository: Repository,
+    application: Application,
+    private val repository: Repository,
 ) : AndroidViewModel(application) {
     lateinit var imageCapture: ImageCapture
     lateinit var videoCapture: VideoCapture
@@ -38,6 +37,9 @@ class MainViewModel @Inject constructor(
 
     @Inject
     lateinit var dirs : File
+
+    @Inject
+    lateinit var sharedPreferencesManager: SharedPreferencesManager
 
     var recording = false
     val recordText = MutableLiveData<String>("녹화")
@@ -57,12 +59,14 @@ class MainViewModel @Inject constructor(
     val onProgress = MutableLiveData<Boolean>(false)
     val progressValue = MutableLiveData<Float>(0.0f)
 
-
     private val locationObserver = Observer<Location> {
         if (recording && userManager.getRecordingVideoID() > 0) {
             captureVideoFrame()
         }
     }
+
+    val logout = MutableLiveData<Unit>()
+
 
     //단일 사진 촬영
     fun takePhoto(){
@@ -157,7 +161,7 @@ class MainViewModel @Inject constructor(
         imageCapture.takePicture(file, object : ImageCapture.OnImageSavedListener {
             override fun onImageSaved(file: File) {
                 Log.i(TAG, "Image File : $file")
-                logFrameLocation(file,LogType.SINGLE_FRAME)
+                logFrameLocation(file,LogType.VIDEO_FRAME)
             }
 
             override fun onError(
@@ -177,6 +181,7 @@ class MainViewModel @Inject constructor(
         val videoId = if(logType == LogType.SINGLE_FRAME) SINGLE_IMAGE else userManager.getRecordingVideoID()
         val disposable = repository.logFrameLocation(
                 userManager.getUserId(),
+                userManager.getUserName(),
                 videoId,
                 location.longitude,
                 location.latitude,
@@ -196,23 +201,31 @@ class MainViewModel @Inject constructor(
     //비디오 종료 시 API 호출하여 서버로 전송
     private fun onVideoStopped(file:File){
         onProgress.postValue(true)
+
         val location = location.value!!
         val altitude = altitude.value!!
         val videoPartFile = ProgressRequestBody(file)
-        videoPartFile.getProgressSubject()
+
+        val videoRecord = VideoRecord(
+            userManager.getUserId(),
+            userManager.getUserName(),
+            userManager.getRecordingVideoID(),
+            location.longitude,
+            location.latitude,
+            altitude.toDouble(),
+            videoPartFile
+        )
+        val fileDisposable =
+            videoPartFile.getProgressSubject()
                 .subscribeOn(Schedulers.io())
                 .subscribe {
                     Log.i("PROGRESS", "stopVideoLog: $it")
                     progressValue.postValue(it)
                 }
+        mDisposable.add(fileDisposable)
 
         val disposable = repository.stopVideoLog(
-                userManager.getUserId(),
-                userManager.getRecordingVideoID(),
-                location.longitude,
-                location.latitude,
-                altitude,
-                videoPartFile
+            videoRecord
         ).subscribe({
             logAlert.value = LogAlert.SUCCESS
             onProgress.value = false
@@ -266,6 +279,12 @@ class MainViewModel @Inject constructor(
         }
         return false
     }
+
+    fun logout(){
+        sharedPreferencesManager.setLogout()
+        logout.value = Unit
+    }
+
 
     override fun onCleared() {
         mDisposable.clear()

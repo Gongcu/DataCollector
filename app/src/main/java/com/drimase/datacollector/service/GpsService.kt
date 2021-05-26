@@ -1,34 +1,23 @@
 package com.drimase.datacollector.service
 
 import android.Manifest
-import android.app.Application
-import android.app.Service
 import android.content.Context.LOCATION_SERVICE
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Criteria
 import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
-import android.os.Bundle
-import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
-import com.drimase.datacollector.BaseApplication
+import com.drimase.datacollector.base.BaseApplication
 import javax.inject.Inject
 
-private const val TAG = "GpsService"
 
 class GpsService @Inject constructor(
-        private val application: BaseApplication,
-        private val location : MutableLiveData<Location>
-)  {
+    private val application: BaseApplication,
+    private val location : MutableLiveData<Location>
+) {
 
     private var locationListener: CustomLocationListener = CustomLocationListener(location)
     private val locationManager = application.getSystemService(LOCATION_SERVICE) as LocationManager
@@ -92,7 +81,7 @@ class GpsService @Inject constructor(
         }
 
         return if(gpsLocation == null && networkLocation==null){
-            locationManager!!.getBestProvider(criteria,true)
+            locationManager.getBestProvider(criteria,true)
         }else if(gpsLocation == null)
             LocationManager.NETWORK_PROVIDER
         else
@@ -104,6 +93,10 @@ class GpsService @Inject constructor(
         locationListener.getStatus().observeForever {
             requestLocation()
         }
+    }
+
+    companion object{
+        const val TAG = "GpsService"
     }
 
 }

@@ -2,7 +2,7 @@ package com.drimase.datacollector.di.module
 
 import com.drimase.datacollector.ui.main.MainActivity
 import com.drimase.datacollector.di.util.ActivityScope
-import com.drimase.datacollector.ui.SplashActivity
+import com.drimase.datacollector.ui.splash.SplashActivity
 import com.drimase.datacollector.ui.login.LoginActivity
 import com.drimase.datacollector.ui.registration.RegistrationActivity
 import dagger.Module

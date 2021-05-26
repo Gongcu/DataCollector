@@ -3,8 +3,8 @@ package com.drimase.datacollector.di.module
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.drimase.datacollector.di.ViewModelFactory
-import com.drimase.datacollector.di.util.ActivityScope
 import com.drimase.datacollector.di.util.ViewModelKey
+import com.drimase.datacollector.ui.splash.SplashViewModel
 import com.drimase.datacollector.ui.login.LoginViewModel
 import com.drimase.datacollector.ui.main.MainViewModel
 import com.drimase.datacollector.ui.registration.RegistrationViewModel
@@ -16,6 +16,11 @@ import dagger.multibindings.IntoMap
 abstract class ViewModelModule {
     @Binds
     abstract fun  bindViewModelFactory(factory: ViewModelFactory) : ViewModelProvider.Factory
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(SplashViewModel::class)
+    abstract fun bindsSplashViewModel(viewModel: SplashViewModel):ViewModel
 
     @Binds
     @IntoMap

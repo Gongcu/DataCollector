@@ -1,4 +1,4 @@
-package com.drimase.datacollector
+package com.drimase.datacollector.base
 
 import com.drimase.datacollector.di.component.DaggerApplicationComponent
 import dagger.android.AndroidInjector

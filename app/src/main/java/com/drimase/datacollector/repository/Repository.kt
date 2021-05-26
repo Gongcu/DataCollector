@@ -1,14 +1,9 @@
-package com.drimase.datacollector
+package com.drimase.datacollector.repository
 
 import android.location.Location
-import androidx.databinding.adapters.ProgressBarBindingAdapter
-import com.drimase.datacollector.dto.AccidentProneArea
-import com.drimase.datacollector.dto.RegistrationRequest
-import com.drimase.datacollector.dto.User
-import com.drimase.datacollector.dto.VideoResponse
+import com.drimase.datacollector.dto.*
 import com.drimase.datacollector.service.LogService
 import com.drimase.datacollector.ui.main.MainViewModel
-import com.drimase.datacollector.util.ProgressRequestBody
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -55,12 +50,13 @@ class Repository @Inject constructor(
                 .subscribeOn(Schedulers.io())
     }
 
-    fun logFrameLocation(userId:Int,videoId:Int,longitude:Double,latitude:Double,altitude:Float, file: File): Single<Unit>{
+    fun logFrameLocation(userId:Int,userName:String,videoId:Int,longitude:Double,latitude:Double,altitude:Float, file: File): Single<Unit>{
         val requestFile = RequestBody.create(MediaType.parse("multipart/from-data"), file)
 
         val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("userId",userId.toString())
+                .addFormDataPart("userName",userName)
                 .addFormDataPart("videoId",videoId.toString())
                 .addFormDataPart("longitude",longitude.toString())
                 .addFormDataPart("latitude",latitude.toString())
@@ -80,15 +76,16 @@ class Repository @Inject constructor(
                 .subscribeOn(Schedulers.io())
     }
 
-    fun stopVideoLog(userId:Int,videoId:Int,longitude:Double,latitude:Double,altitude: Float,videoPartFile: ProgressRequestBody): Single<Unit>{
+    fun stopVideoLog(videoRecord: VideoRecord): Single<Unit>{
         val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("userId",userId.toString())
-                .addFormDataPart("videoId",videoId.toString())
-                .addFormDataPart("longitude",longitude.toString())
-                .addFormDataPart("latitude",latitude.toString())
-                .addFormDataPart("altitude",altitude.toString())
-                .addFormDataPart("video",videoPartFile.getFilename(),videoPartFile)
+                .addFormDataPart("userId",videoRecord.userId.toString())
+                .addFormDataPart("userName",videoRecord.userName)
+                .addFormDataPart("videoId",videoRecord.videoId.toString())
+                .addFormDataPart("longitude",videoRecord.longitude.toString())
+                .addFormDataPart("latitude",videoRecord.latitude.toString())
+                .addFormDataPart("altitude",videoRecord.altitude.toString())
+                .addFormDataPart("video",videoRecord.file.getFilename(),videoRecord.file)
                 .build()
 
         return logService.stopVideoLog(requestBody)

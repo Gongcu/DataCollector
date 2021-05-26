@@ -4,12 +4,11 @@ import android.app.Application
 import android.content.Context
 import android.location.Location
 import androidx.lifecycle.MutableLiveData
-import com.drimase.datacollector.BaseApplication
+import com.drimase.datacollector.base.BaseApplication
 import com.drimase.datacollector.R
-import com.drimase.datacollector.di.util.ActivityScope
 import com.drimase.datacollector.service.UserManager
 import com.drimase.datacollector.di.util.ApplicationContext
-import com.drimase.datacollector.service.CustomLocationListener
+import com.drimase.datacollector.service.SharedPreferencesManager
 import dagger.Module
 import dagger.Provides
 import java.io.File
@@ -40,6 +39,12 @@ class AppModule {
     @Provides
     fun provideUserManager(): UserManager {
         return UserManager()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(application: BaseApplication): SharedPreferencesManager {
+        return SharedPreferencesManager(application)
     }
 
     @Singleton

@@ -1,23 +1,20 @@
 package com.drimase.datacollector.ui.main
 
 import android.annotation.SuppressLint
-import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.camera.core.*
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
-import com.drimase.datacollector.BaseActivity
+import com.drimase.datacollector.base.BaseActivity
 import com.drimase.datacollector.R
 import com.drimase.datacollector.databinding.ActivityMainBinding
 import com.drimase.datacollector.di.ViewModelFactory
-import com.drimase.datacollector.ui.login.LoginViewModel
-import com.tbruyelle.rxpermissions3.RxPermissions
+import com.drimase.datacollector.ui.login.LoginActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
@@ -28,7 +25,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),LifecycleOwner {
     private val mainViewModel :MainViewModel by lazy {
         ViewModelProvider(this@MainActivity, viewModelFactory).get(MainViewModel::class.java)
     }
-
 
     override fun layoutRes(): Int {
         return R.layout.activity_main
@@ -69,6 +65,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),LifecycleOwner {
                 LogAlert.ON_PROGRESS -> Toast.makeText(this,"현재 영상을 업로드 중입니다.",Toast.LENGTH_SHORT).show()
             }
         })
+
+        mainViewModel.logout.observe(this,{
+            goToLoginActivity()
+        })
+
     }
 
     override fun onStop() {
@@ -102,5 +103,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),LifecycleOwner {
     }
     private fun generateToast(){
         Toast.makeText(applicationContext,"사고 다발 지역입니다.",Toast.LENGTH_LONG).show()
+    }
+
+    private fun goToLoginActivity(){
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
     }
 }
