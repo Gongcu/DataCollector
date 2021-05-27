@@ -3,8 +3,15 @@ package com.drimase.datacollector.ui.splash
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
+import android.content.Intent
+import android.location.LocationManager
+import android.provider.Settings
+import androidx.core.app.ActivityCompat
+import androidx.core.location.LocationManagerCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import com.drimase.datacollector.base.BaseApplication
 import com.drimase.datacollector.dto.User
 import com.drimase.datacollector.service.SharedPreferencesManager
 import com.drimase.datacollector.service.UserManager
@@ -55,6 +62,14 @@ class SplashViewModel @Inject constructor(
                 return false
         return true
     }
+
+
+
+    fun isLocationEnabled(): Boolean {
+        val locationManager = getApplication<BaseApplication>().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return LocationManagerCompat.isLocationEnabled(locationManager)
+    }
+
 
     companion object{
         val permissions = arrayOf(

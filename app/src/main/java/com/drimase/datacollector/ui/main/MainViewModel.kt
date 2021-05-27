@@ -101,6 +101,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    //주변 사고 다발 지역 확인
     fun detect(){
         location.value?.let {location ->
             repository.detect(location)
@@ -145,6 +146,7 @@ class MainViewModel @Inject constructor(
     }
 
 
+    //현재 촬영중인 영상 ID 설정
     private fun setRecordingVideoIdToUserManager(){
         val disposable = repository.startVideoLog(userManager.getUserId()).subscribe({
             userManager.setRecordingVideoID(it.id)
