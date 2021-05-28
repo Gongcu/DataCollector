@@ -30,7 +30,7 @@ class MainViewModel @Inject constructor(
     lateinit var userManager: UserManager
 
     @Inject
-    lateinit var gpsService: GpsService
+    lateinit var gpsService: LocationService
 
     @Inject
     lateinit var sensorManager: SensorManager
@@ -179,7 +179,7 @@ class MainViewModel @Inject constructor(
     //위치 및 사진 정보 서버로 전송
     private fun logFrameLocation(file: File, logType: LogType){
         val location = location.value!!
-        val altitude = altitude.value!!
+        val altitude = altitude.value?:location.altitude.toFloat()
         val videoId = if(logType == LogType.SINGLE_FRAME) SINGLE_IMAGE else userManager.getRecordingVideoID()
         val disposable = repository.logFrameLocation(
                 userManager.getUserId(),
@@ -205,7 +205,7 @@ class MainViewModel @Inject constructor(
         onProgress.postValue(true)
 
         val location = location.value!!
-        val altitude = altitude.value!!
+        val altitude = altitude.value?:location.altitude.toFloat()
         val videoPartFile = ProgressRequestBody(file)
 
         val videoRecord = VideoRecord(

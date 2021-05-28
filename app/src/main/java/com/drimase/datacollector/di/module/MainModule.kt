@@ -7,7 +7,7 @@ import com.drimase.datacollector.base.BaseApplication
 import com.drimase.datacollector.ui.main.MainActivity
 import com.drimase.datacollector.di.util.ActivityContext
 import com.drimase.datacollector.di.util.ActivityScope
-import com.drimase.datacollector.service.GpsService
+import com.drimase.datacollector.service.LocationService
 import com.drimase.datacollector.service.SensorManager
 import dagger.Module
 import dagger.Provides
@@ -31,8 +31,8 @@ object MainModule {
 
     @Provides
     @ActivityScope
-    fun provideGpsService(application: BaseApplication, location:MutableLiveData<Location>) : GpsService {
-        return GpsService(application,location)
+    fun provideGpsService(application: BaseApplication, location:MutableLiveData<Location>) : LocationService {
+        return LocationService(application,location)
     }
 
     @Provides
