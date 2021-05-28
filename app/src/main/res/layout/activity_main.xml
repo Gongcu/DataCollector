@@ -5,6 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
+            name="activity"
+            type="com.drimase.datacollector.ui.main.MainActivity" />
+        <variable
             name="viewModel"
             type="com.drimase.datacollector.ui.main.MainViewModel" />
     </data>
@@ -124,8 +127,8 @@
             android:id="@+id/record_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{viewModel.recordText.toString()}"
-            android:onClick="@{(v)->viewModel.onRecordClick()}"
+            android:text="@{activity.recordText.toString()}"
+            android:onClick="@{()->activity.onRecordClick()}"
             android:textStyle="bold"
             android:textColor="@color/blue"
             android:backgroundTint="@color/white"
@@ -141,7 +144,7 @@
             android:layout_height="wrap_content"
             android:textStyle="bold"
             android:text="사진 촬영"
-            android:onClick="@{(v)->viewModel.takePhoto()}"
+            android:onClick="@{()->activity.takePhoto()}"
             android:textColor="@color/blue"
             android:backgroundTint="@color/white"
             android:layout_marginBottom="80dp"
